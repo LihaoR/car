@@ -59,14 +59,14 @@ h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3) # Size 26x40x64
 h_pool3 = max_pool_2x2(h_conv3) # Finished 2nd Conv. layer. Should result in 13x20x128 volume.
 
 # 4th Convolutional layer
-W_conv4 = weight_variable([4, 4, 128, 256])
-b_conv4 = bias_variable([256])
+W_conv4 = weight_variable([4, 4, 128, 128])
+b_conv4 = bias_variable([128])
 
 h_conv4 = tf.nn.relu(conv2d(h_pool3, W_conv4) + b_conv4) # Size 13x20x128
 h_pool4 = max_pool_2x2(h_conv4) # Finished 2nd Conv. layer. Should result in 7x10x256 volume.
 
 # 5th Convolutional layer
-W_conv5 = weight_variable([4, 4, 256, 256])
+W_conv5 = weight_variable([4, 4, 128, 256])
 b_conv5 = bias_variable([256])
 
 h_conv5 = tf.nn.relu(conv2d(h_pool4, W_conv5) + b_conv5) # Size 7x10x256
@@ -81,7 +81,7 @@ h_fc1 = tf.nn.relu(tf.matmul(h_pool5_flat, W_fc1) + b_fc1)
 
 # Dropout
 # Prevents over-fitting. Use less than 1.0 only when training. When evaluating leave 1.0.
-keep_prob = tf.placeholder("float32")
+keep_prob = tf.placeholder("float32", [])
 
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
@@ -101,21 +101,32 @@ b_fc_value = bias_variable([8])
 
 values_est = tf.matmul(h_fc2_drop, W_fc_value) + b_fc_value # Output layer.
 a_prob = tf.nn.softmax(tf.matmul(h_fc2_drop, W_fc_advantage) + b_fc_advantage)
+
 #tf.summary.scalar('Q_values', Q_values_est)
 
 
-a = tf.placeholder("float", [])
+a = tf.placeholder(tf.int32, [None, ])
+#a = tf.placeholder(tf.float32, [None, ])
 learning_rate = tf.placeholder("float32", shape=[])
 values_new = tf.placeholder("float32", shape=[None, 8])
     
 td = values_est - values_new
 log_a = tf.log(tf.clip_by_value(a_prob, 1e-20, 1.0))
-entropy = -tf.reduce_sum(a_prob * log_a, reduction_indices=1)
-a_loss = -tf.reduce_sum(tf.reduce_sum(tf.multiply(log_a, a), reduction_indices=1)*td + entropy*entropy_beta )
 
-c_loss = 0.5 * tf.nn.l2_loss(values_est - values_new)
+ak = tf.one_hot(a, 8, dtype=tf.float32)
+entropy = -tf.reduce_sum(a_prob * log_a, axis=1, keep_dims=True)
+tmp1 = tf.multiply(log_a, ak)
+tmp2 = tf.reduce_sum(tmp1, axis=1, keep_dims=True)
+tmp3 = tmp2*td
+tmp4 = entropy*entropy_beta
+a_loss = -tf.reduce_sum(tmp3 + tmp4)
+
+c_loss = tf.nn.l2_loss(values_est - values_new)
 loss = a_loss + c_loss
 #tf.summary.scalar('Loss', loss)
-optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(loss)
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
+
+
+
 
 
