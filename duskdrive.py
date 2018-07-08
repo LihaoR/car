@@ -21,7 +21,8 @@ env.configure(remotes=1)  # automatically creates a local docker container
 
 UPDATE_GLOBAL_ITER = 10
 learning_rate = 0.0001
-GAMMA = 0.9
+batch_size = 50
+GAMMA = 0.99
 entropy_beta = 0.01
 keep_prob=1.0
 sess = tf.InteractiveSession()
@@ -34,8 +35,7 @@ actionSpace = [[], #0 For 'No Operation' action. I. e. do nothing.
                [('KeyEvent', 'ArrowUp', False), ('KeyEvent', 'ArrowDown', True), ('KeyEvent', 'ArrowLeft', False), ('KeyEvent', 'ArrowRight', False), ('KeyEvent', 'N', False)], #5 Brake
                [('KeyEvent', 'ArrowUp', False), ('KeyEvent', 'ArrowDown', True), ('KeyEvent', 'ArrowLeft', True), ('KeyEvent', 'ArrowRight', False), ('KeyEvent', 'N', False)],  #6 Brake-left
                [('KeyEvent', 'ArrowUp', False), ('KeyEvent', 'ArrowDown', True), ('KeyEvent', 'ArrowLeft', False), ('KeyEvent', 'ArrowRight', True), ('KeyEvent', 'N', False)]]  #7 Brake-right
-batch_size = 50
-learning_rate = 0.00001
+
 
 screenTopLeftCorner = [84,18] # Top left corner position. 84 from top, 18 from left margin.
 env = gym.make('flashgames.DuskDrive-v0')
