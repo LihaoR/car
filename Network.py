@@ -78,22 +78,7 @@ b_fc2 = bias_variable([1024])
 
 h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
-"""
-    # 3rd Densly connected layer
-W_fc3 = weight_variable([1024, 1024])
-b_fc3 = bias_variable([1024])
 
-h_fc3 = tf.nn.relu(tf.matmul(h_fc2_drop, W_fc3) + b_fc3)
-h_fc3_drop = tf.nn.dropout(h_fc3, keep_prob)
-
-
-    # 4th Densly connected layer
-W_fc4 = weight_variable([1024, 1024])
-b_fc4 = bias_variable([1024])
-
-h_fc4 = tf.nn.relu(tf.matmul(h_fc3_drop, W_fc4) + b_fc4)
-h_fc4_drop = tf.nn.dropout(h_fc4, keep_prob)
-"""
 # Readout layer
 W_fc_advantage = weight_variable([1024, 8])
 b_fc_advantage = bias_variable([8])
@@ -119,7 +104,7 @@ log_a = tf.log(tf.clip_by_value(a_prob, 1e-20, 1.0))
 entropy = -tf.reduce_sum(a_prob * log_a, reduction_indices=1)
 tmp1 = tf.multiply(log_a, ak)
 tmp2 = tf.reduce_sum(tmp1, reduction_indices=1)
-tmp3 = tmp2 * td
+tmp3 = tmp2 * tf.stop_gradient(td)
 tmp4 = entropy * entropy_beta
 a_loss = -tf.reduce_sum(tmp3 + tmp4)
 
