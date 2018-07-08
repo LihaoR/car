@@ -77,16 +77,6 @@ while True:
             motionTracer = ImageProcessing.MotionTracer(pixels_raw) # create the object
         else:
             motionTracer.process(pixels_raw) # do stuff to create motion image
-        
-            if counter > 399: # Ignore the unearned reward while the car still has it's initial momentum at the start
-                # Add data to the replay memory
-                # Corresponding Action and Reward gets added one env.step latter than state and q_values
-                """
-                RM.stateArray = np.vstack((RM.stateArray, state))  # 'state' comes from previous step
-                RM.q_valueArray = np.concatenate((RM.q_valueArray, Q_values_est), axis=0)  # 'Q_values_est' comes from previous step
-                RM.actionArray = np.concatenate((RM.actionArray, action_as_1D_array), axis=0)
-                RM.rewardArray = np.concatenate((RM.rewardArray, rewardNormalized), axis=0)
-                """
                
         # state = Returs 'grayscale' channel [0] and 'grayscale-motion trace' channel [1]
         state_raw = motionTracer.get_state() # Size 102x160x2 :
@@ -126,13 +116,7 @@ while True:
                 action_batch = buffer_a
                 state_batch = buffer_s
                 Q_value_batch = buffer_v_target
-                """
-                state_batch = np.divide(RM.stateArray[i*batch_size:(i+1)*batch_size].astype(np.float32), 50)
-                state_batch = np.reshape(state_batch, [-1, 102, 160, 2])
-                action_batch = RM.actionArray[i*batch_size:(i+1)*batch_size]
-                Q_value_batch = RM.q_valueArray[i*batch_size:(i+1)*batch_size]
-                Q_value_batch = np.reshape(Q_value_batch, [-1])
-                """
+
                 #print "stateArray", state_batch
                 loss = NN.loss.eval(feed_dict={NN.a: action_batch, 
                                                NN.x_state: state_batch, 
